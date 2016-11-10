@@ -1,0 +1,36 @@
+
+
+'''
+Feature 1
+input: A pays B
+is A on B's payee list?
+is B on A's payee  list?
+B to A's list in alphabetical order!
+'''
+
+'''
+Feature 2
+Is there a name on A's friend list that is also on B's list?
+(we don't need a full union, just the first example that works)
+might be a clever way to do this with 2 alphabetical lists?
+Add B to A's friend list
+Add A to B's friend list
+'''
+
+'''
+Feature 3
+Option A
+build full graph 
+ask for shortest path
+is that path 3 or less?
+
+
+Option B
+is there a name on A's friend list that's on B's 2ndary friend list?
+always keep lists alpahbetical!
+add A to B's friends
+Add A's friends to B's 2ndary friends list
+Add B to A's friends
+Add B's friends to A's 2ndary friends list
+'''
+
