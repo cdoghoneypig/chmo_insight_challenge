@@ -28,6 +28,8 @@ errorlog = open("errorlog.txt", "w")
 print("\n\nIntializing database now...\n")
 
 friends = {}
+transaction_history = {"Amount": {}, "Count": {}}
+
 
 count = 0
 row_num = 0
@@ -46,6 +48,12 @@ for row in reader:
         # and in another setting, that could be discussed beforehand.
         giver_id = int(row[1])
         taker_id = int(row[2])
+        try:
+            transaction_history["Amount"][taker_id] += round(float(row[3]),2)
+            transaction_history["Count"][taker_id] += 1
+        except KeyError:
+            transaction_history["Amount"][taker_id] = round(float(row[3]),2)
+            transaction_history["Count"][taker_id] = 1
         '''
         For initialization, we assume taker_id is usually not in friend or 
         secondary so will simply add it to the set.
@@ -73,6 +81,59 @@ print("Database of", "{:,}".format(count), "old records intialized in", round((e
 print("{:,}".format(int(count/(end-start))), "records per second")
 
 base_transactions_file.close()
+
+
+# feature 4: Make top n list of users with most total amount
+# transacted during this period
+# I'm using 1000 because the top 1000 users are all making 600+ transactions
+# and thousands of dollars in this 3 hr period
+leaderboard_length = 1000
+top_takers = {"Amount": [], "Count": []}
+
+start = timer()
+top_takers["Amount"] = sorted(
+                transaction_history["Amount"], 
+                key=transaction_history["Amount"].get, 
+                reverse=True)[:leaderboard_length]
+
+with open(sys.argv[6], "w") as output4_file:
+    output4_csv = csv.writer(output4_file, lineterminator="\n")
+    output4_csv.writerow( ["ID","Total Amount","Number Transactions"] )
+    for taker_id in top_takers["Amount"]:
+        output4_csv.writerow    ([
+                                taker_id,
+                                round(transaction_history["Amount"][taker_id],2),
+                                transaction_history["Count"][taker_id]
+                                ])
+
+# output4_file = open(sys.argv[6], "w")
+# output4_csv = csv.writer(output4_file)
+# output4_file.close()
+end = timer()
+print("Feature 4 processed and outputted in", round((end-start)*1000), "ms")
+
+# feature 5: Make top 100 list of users with the most transactions
+# during this period
+start = timer()
+top_takers["Count"] = sorted(
+                transaction_history["Count"], 
+                key=transaction_history["Count"].get, 
+                reverse=True)[:leaderboard_length]
+
+with open(sys.argv[7], "w") as output5_file:
+    output5_csv = csv.writer(output5_file, lineterminator="\n")
+    output5_csv.writerow( ["ID","Number Transactions","Total Amount"] )
+    for taker_id in top_takers["Count"]:
+        output5_csv.writerow    ([
+                                taker_id,
+                                transaction_history["Count"][taker_id],
+                                round(transaction_history["Amount"][taker_id],2)
+                                ])
+end = timer()
+print("Feature 5 processed and outputted in", round((end-start)*1000), "ms")
+
+
+
 
 
 
@@ -123,6 +184,12 @@ for row in reader:
         verified = [False, False, False]
         giver_id = int(row[1])
         taker_id = int(row[2])
+        try:
+            transaction_history["Amount"][taker_id] += round(float(row[3]),2)
+            transaction_history["Count"][taker_id] += 1
+        except KeyError:
+            transaction_history["Amount"][taker_id] = round(float(row[3]),2)
+            transaction_history["Count"][taker_id] = 1
         try:
             # Starting from most likely relationship to least
             # If no relation at that level, try next
@@ -187,7 +254,10 @@ for row in reader:
 
 end = timer()
 print("Database of", "{:,}".format(count), "streamed records analyzed in", round((end - start),1), "seconds")
-print("{:,}".format(int(count/(end-start))), "records per second")
+print("Averaging", "{:,}".format(int(count/(end-start))), "records per second")
+
+
+
 
 for each_out in output:
     each_out.close()
