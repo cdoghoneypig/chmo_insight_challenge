@@ -14,6 +14,7 @@ def error_Bad_ID(n,r):
     errorlog.write(str(r) + "\n")
 
 
+total_time_start = timer()
 base_transactions_file = open(sys.argv[1], 'r', encoding='utf-8')
 
 # for use in console
@@ -81,60 +82,6 @@ print("Database of", "{:,}".format(count), "old records intialized in", round((e
 print("{:,}".format(int(count/(end-start))), "records per second")
 
 base_transactions_file.close()
-
-
-# feature 4: Make top n list of users with most total amount
-# transacted during this period
-# I'm using 1000 because the top 1000 users are all making 600+ transactions
-# and thousands of dollars in this 3 hr period
-leaderboard_length = 1000
-top_takers = {"Amount": [], "Count": []}
-
-start = timer()
-top_takers["Amount"] = sorted(
-                transaction_history["Amount"], 
-                key=transaction_history["Amount"].get, 
-                reverse=True)[:leaderboard_length]
-
-with open(sys.argv[6], "w") as output4_file:
-    output4_csv = csv.writer(output4_file, lineterminator="\n")
-    output4_csv.writerow( ["ID","Total Amount","Number Transactions"] )
-    for taker_id in top_takers["Amount"]:
-        output4_csv.writerow    ([
-                                taker_id,
-                                round(transaction_history["Amount"][taker_id],2),
-                                transaction_history["Count"][taker_id]
-                                ])
-
-# output4_file = open(sys.argv[6], "w")
-# output4_csv = csv.writer(output4_file)
-# output4_file.close()
-end = timer()
-print("Feature 4 processed and outputted in", round((end-start)*1000), "ms")
-
-# feature 5: Make top 100 list of users with the most transactions
-# during this period
-start = timer()
-top_takers["Count"] = sorted(
-                transaction_history["Count"], 
-                key=transaction_history["Count"].get, 
-                reverse=True)[:leaderboard_length]
-
-with open(sys.argv[7], "w") as output5_file:
-    output5_csv = csv.writer(output5_file, lineterminator="\n")
-    output5_csv.writerow( ["ID","Number Transactions","Total Amount"] )
-    for taker_id in top_takers["Count"]:
-        output5_csv.writerow    ([
-                                taker_id,
-                                transaction_history["Count"][taker_id],
-                                round(transaction_history["Amount"][taker_id],2)
-                                ])
-end = timer()
-print("Feature 5 processed and outputted in", round((end-start)*1000), "ms")
-
-
-
-
 
 
 
@@ -256,10 +203,65 @@ end = timer()
 print("Database of", "{:,}".format(count), "streamed records analyzed in", round((end - start),1), "seconds")
 print("Averaging", "{:,}".format(int(count/(end-start))), "records per second")
 
-
-
-
 for each_out in output:
     each_out.close()
 stream_transactions_file.close()
 errorlog.close()
+
+# feature 4: Make top n list of users with most total amount
+# transacted during this period
+# I'm using 1000 because the top 1000 users are all making 600+ transactions
+# and thousands of dollars in this 3 hr period
+leaderboard_length = 1000
+top_takers = {"Amount": [], "Count": []}
+
+start = timer()
+top_takers["Amount"] = sorted(
+                transaction_history["Amount"], 
+                key=transaction_history["Amount"].get, 
+                reverse=True)[:leaderboard_length]
+
+with open(sys.argv[6], "w") as output4_file:
+    output4_csv = csv.writer(output4_file, lineterminator="\n")
+    output4_csv.writerow( ["ID","Total Amount","Number Transactions"] )
+    for taker_id in top_takers["Amount"]:
+        output4_csv.writerow    ([
+                                taker_id,
+                                round(transaction_history["Amount"][taker_id],2),
+                                transaction_history["Count"][taker_id]
+                                ])
+
+# output4_file = open(sys.argv[6], "w")
+# output4_csv = csv.writer(output4_file)
+# output4_file.close()
+end = timer()
+print("Feature 4 processed and outputted in", round((end-start)*1000), "ms")
+
+# feature 5: Make top 100 list of users with the most transactions
+# during this period
+start = timer()
+top_takers["Count"] = sorted(
+                transaction_history["Count"], 
+                key=transaction_history["Count"].get, 
+                reverse=True)[:leaderboard_length]
+
+with open(sys.argv[7], "w") as output5_file:
+    output5_csv = csv.writer(output5_file, lineterminator="\n")
+    output5_csv.writerow( ["ID","Number Transactions","Total Amount"] )
+    for taker_id in top_takers["Count"]:
+        output5_csv.writerow    ([
+                                taker_id,
+                                transaction_history["Count"][taker_id],
+                                round(transaction_history["Amount"][taker_id],2)
+                                ])
+end = timer()
+print("Feature 5 processed and outputted in", round((end-start)*1000), "ms")
+
+# total_time = timer() - total_time_start
+# m, s = divmod(total_time, 60)
+# h, m = divmod(m, 60)
+# print   (
+#         "Total runtime",
+#         "%d:%02d:%02d" % (h, m, s)
+#         )
+
